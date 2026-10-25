@@ -36,7 +36,7 @@ differently: shown for review) or **Couldn't replay** (Spectra says why, and ask
    ingest key) and `SPECTRA_REPRODUCE_TOKEN` (the CI token). Enable GitHub Pages with "GitHub Actions" as the source.
 3. Push to `main`, visit the deployed site and use it for a while, or have a few people do so. For visitors on
    demand, `node scripts/demo-visitors.mjs https://<owner>.github.io/<repo>/ 2`: each round is a new visitor who
-   signs up and comes back eleven times in a real browser (reads, favorites, comments, follows, filters, pages,
+   signs up and comes back eight times in a real browser (reads, favorites, follows, filters,
    settings, writes, signs out and in).
 4. Open a pull request.
 
