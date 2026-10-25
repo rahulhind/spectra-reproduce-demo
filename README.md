@@ -34,7 +34,10 @@ differently: shown for review) or **Couldn't replay** (Spectra says why, and ask
 1. In Spectra: create a site, have Reproduce switched on for it, and create a CI token (Reproduce > Checks > Tokens).
 2. In the fork's settings: the variable `SPECTRA_SITE` (your site id), and the secrets `SPECTRA_KEY` (the site's
    ingest key) and `SPECTRA_REPRODUCE_TOKEN` (the CI token). Enable GitHub Pages with "GitHub Actions" as the source.
-3. Push to `main`, visit the deployed site and use it for a while (or have a few people do so).
+3. Push to `main`, visit the deployed site and use it for a while, or have a few people do so. For visitors on
+   demand, `node scripts/demo-visitors.mjs https://<owner>.github.io/<repo>/ 2`: each round is a new visitor who
+   signs up and comes back eleven times in a real browser (reads, favorites, comments, follows, filters, pages,
+   settings, writes, signs out and in).
 4. Open a pull request.
 
 ## Attribution and licence
