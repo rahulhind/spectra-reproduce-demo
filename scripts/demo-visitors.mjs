@@ -129,9 +129,15 @@ async function visit(context, account, what, fn, { signedIn = true } = {}) {
   await page.close()
 }
 
-const browser = await chromium.launch()
+// Spectra does not record automated browsers (navigator.webdriver, a "HeadlessChrome" user agent), so these demo
+// visitors present themselves as an ordinary Chrome: they are the site owner's own traffic, made to be recorded.
+const browser = await chromium.launch({ args: ['--disable-blink-features=AutomationControlled'] })
+const probe = await browser.newPage()
+const headlessAgent = await probe.evaluate(() => navigator.userAgent)
+await probe.close()
+const userAgent = headlessAgent.replace('HeadlessChrome', 'Chrome')
 for (let round = 0; round < rounds; round++) {
-  const context = await browser.newContext()
+  const context = await browser.newContext({ userAgent, viewport: { width: 1280, height: 800 } })
   const name = `visitor${Date.now().toString(36)}`
   const password = `pw-${Math.random().toString(36).slice(2)}-A1`
   const account = { name, password }
