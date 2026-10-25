@@ -23,7 +23,7 @@ const to = path => `${base}#${path}`
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 const API = (process.env.REALWORLD_API || 'https://api.realworld.show').replace(/\/$/, '')
 // Fonts and icons come from other hosts; a visit starts when the page's own HTML has arrived.
-const go = (page, path) => page.goto(to(path), { waitUntil: 'domcontentloaded' })
+const go = (page, path) => page.goto(to(path), { waitUntil: 'domcontentloaded', timeout: 60_000 })
 // A person looks at the page before doing anything with it.
 const look = page => page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {}).then(() => sleep(800))
 const firstPreview = page => page.locator('.article-preview').first()
@@ -106,16 +106,16 @@ const tally = { done: 0, failed: 0 }
 
 async function visit(context, account, what, fn, { signedIn = true } = {}) {
   const page = await context.newPage()
-  if (signedIn) {
-    const user = await signIn(account)
-    await page.addInitScript(u => {
-      if (sessionStorage.getItem('demo-signed-in'))
-        return
-      sessionStorage.setItem('demo-signed-in', '1')
-      localStorage.setItem('user', JSON.stringify(u))
-    }, user)
-  }
   try {
+    if (signedIn) {
+      const user = await signIn(account)
+      await page.addInitScript(u => {
+        if (sessionStorage.getItem('demo-signed-in'))
+          return
+        sessionStorage.setItem('demo-signed-in', '1')
+        localStorage.setItem('user', JSON.stringify(u))
+      }, user)
+    }
     await fn(page)
     tally.done++
     console.log(`  ${what}: ok`)
