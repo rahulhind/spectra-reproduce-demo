@@ -26,8 +26,8 @@ differently: shown for review) or **Couldn't replay** (Spectra says why, and ask
 
 | Pull request | The change | What Spectra says |
 |---|---|---|
-| **Favorite button refactor** (`demo/broken-favorite`) | One character: the favorite button's `disabled` condition is inverted, so the button never responds. Type-checks, lints, and passes the unit tests. | **Broken**: "step 6 (click) now does nothing", naming the journey. The check fails. |
-| **Tidy the favorite logic** (`demo/harmless-refactor`) | The same feature reorganised, behaviour unchanged. | **Same** on every journey. The check passes. |
+| **Fade long descriptions** (`demo/broken-favorite`) | A 13-line style change: a gradient fades each article card out at the bottom. The fade is a layer over the whole card, so in a real browser it takes every click meant for the card: the favorite button and the article link stop responding. It looks right, type-checks, lints, builds, and passes all 63 unit tests (they run without a layout engine, where nothing covers anything). | **Broken** on the journeys that favorite or open an article from the feed: "step N (click …) can't be done", with the journey and the step. The check fails. |
+| **Fade, done right; tidy the favorite logic** (`demo/harmless-refactor`) | The same fade, with clicks passed through to the card (`pointer-events: none`), and the favorite logic rewritten without changing what it does. | **Same** on every journey. The check passes. |
 
 ## Running it on your own fork
 
