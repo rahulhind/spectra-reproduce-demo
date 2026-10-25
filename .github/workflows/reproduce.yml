@@ -1,0 +1,32 @@
+# The Spectra Reproduce check: this pull request's build, judged against production by replaying real visitors'
+# journeys on both. The check fails only when something people actually do now breaks.
+name: Spectra Reproduce
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # This pull request's build, as production builds it. Uploaded to Spectra and served privately for the check:
+      # no preview deployment needed.
+      - run: pnpm exec vite build --base ./
+      - run: node scripts/add-spectra-tag.mjs dist
+        env:
+          SPECTRA_SITE: ${{ vars.SPECTRA_SITE }}
+          SPECTRA_KEY: ${{ secrets.SPECTRA_KEY }}
+      - uses: ./.github/actions/spectra-reproduce
+        with:
+          site: ${{ vars.SPECTRA_SITE }}
+          token: ${{ secrets.SPECTRA_REPRODUCE_TOKEN }}
+          base: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          candidate: dist

@@ -1,0 +1,62 @@
+# Spectra Reproduce: the pull-request check as a GitHub Action (ARCHITECTURE.md §7).
+#
+# Asks Spectra to judge this pull request's build against production, using the site's Journey Library: real
+# visitors' journeys, kept by Spectra from production recordings. Spectra's workers replay each journey on both builds
+# and judge it by what each step leads to. The action waits for the verdict, writes the report to the job summary, and
+# fails the job only when a journey is BROKEN. Anything Spectra cannot judge goes to the Reproduce inbox in the
+# dashboard ("needs input"), never a silent pass.
+#
+# A build is a URL (a preview deployment, reachable from the internet) or a folder (a static frontend's output:
+# dist/, build/): a folder is uploaded and served privately by Spectra's worker for the check.
+#
+#   - uses: spectra-trace/reproduce-action@v1
+#     with:
+#       site: ${{ vars.SPECTRA_SITE }}
+#       token: ${{ secrets.SPECTRA_REPRODUCE_TOKEN }}   # a CI token: Dashboard > Reproduce > Checks > Tokens
+#       base: https://www.example.com                  # production, or a folder built from the base branch
+#       candidate: dist                                # this pull request's build: a folder or its preview URL
+#
+# Packaged as its own repository by action/package-action.mjs (the CLI is copied from service/).
+name: Spectra Reproduce
+description: Replay real users' journeys against this pull request's build; fail only when something users do now breaks.
+branding:
+  icon: rotate-ccw
+  color: blue
+inputs:
+  site:
+    description: The Spectra site id
+    required: true
+  token:
+    description: A Reproduce CI token for the site (Dashboard > Reproduce > Checks > Tokens)
+    required: true
+  base:
+    description: The production (or base branch) build, as a URL or a folder
+    required: true
+  candidate:
+    description: This pull request's build, as a URL or a folder
+    required: true
+  runs:
+    description: Replays per journey on each build
+    required: false
+    default: '3'
+  timeout-minutes:
+    description: How long to wait for the verdict
+    required: false
+    default: '30'
+  server:
+    description: The Spectra API
+    required: false
+    default: https://api.spectra-trace.com
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        SPECTRA_SERVER: ${{ inputs.server }}
+        SPECTRA_SITE: ${{ inputs.site }}
+        SPECTRA_TOKEN: ${{ inputs.token }}
+      run: >
+        node "${{ github.action_path }}/cli.mjs" check
+        --base "${{ inputs.base }}" --candidate "${{ inputs.candidate }}" --k "${{ inputs.runs }}"
+        --timeout-min "${{ inputs.timeout-minutes }}"
+        --label "${{ github.event.pull_request.title || github.ref_name }}" --commit "${{ github.sha }}"

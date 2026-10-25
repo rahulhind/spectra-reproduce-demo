@@ -1,0 +1,38 @@
+# Production: main, deployed to GitHub Pages with Spectra Reproduce installed. Real visits to it are recorded, and
+# Spectra keeps them as the journeys every pull request is checked against.
+name: Production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vite build --base ./
+      - run: node scripts/add-spectra-tag.mjs dist
+        env:
+          SPECTRA_SITE: ${{ vars.SPECTRA_SITE }}
+          SPECTRA_KEY: ${{ secrets.SPECTRA_KEY }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
