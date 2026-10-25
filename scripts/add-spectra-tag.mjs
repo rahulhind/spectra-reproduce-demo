@@ -5,8 +5,8 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const [dir = 'dist', server = process.env.SPECTRA_SERVER || 'https://api.spectra-trace.com'] = process.argv.slice(2)
-const site = process.env.SPECTRA_SITE
-const key = process.env.SPECTRA_KEY
+const site = process.env.SPECTRA_SITE?.trim()
+const key = process.env.SPECTRA_KEY?.trim()
 if (!site || !key) {
   console.log('add-spectra-tag: no SPECTRA_SITE/SPECTRA_KEY, build left as it is')
   process.exit(0)
