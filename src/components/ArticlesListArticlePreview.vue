@@ -73,3 +73,18 @@ const {
   onUpdate: (newArticle: Article): void => emit('update', newArticle),
 })
 </script>
+
+<style>
+/* Long descriptions fade out at the bottom of the card instead of ending abruptly. */
+.article-preview {
+  position: relative;
+}
+.article-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 75%, #fff);
+  /* Decoration only: clicks go to the card's links and buttons underneath. */
+  pointer-events: none;
+}
+</style>
